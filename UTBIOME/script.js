@@ -43,12 +43,12 @@ const canvas = document.getElementById("dna");
 const ctx = canvas.getContext("2d");
 let W = 0, H = 0;
 
-// Base-pair colours (A–T and C–G pairs), picked in a fixed pattern
+// Base-pair colours (A–T and C–G pairs) in the UTBIOME palette, picked in a fixed pattern
 const PAIRS = [
-  ["#3ee6c4", "#ff7a8a"],
-  ["#9b8cff", "#ffd36e"],
-  ["#ff7a8a", "#3ee6c4"],
-  ["#ffd36e", "#9b8cff"],
+  ["#3375c6", "#132a63"],
+  ["#6bb6f9", "#48648c"],
+  ["#132a63", "#3375c6"],
+  ["#48648c", "#6bb6f9"],
 ];
 const pairFor = i => PAIRS[(i * 7 + (i >> 2)) % PAIRS.length];
 
@@ -86,8 +86,8 @@ function drawDNA(phase) {
         if ((d >= 0) !== front) continue;
         const t = (d + 1) / 2;          // 0 = far, 1 = near
         ctx.strokeStyle = s === 0
-          ? `rgba(62, 230, 196, ${0.25 + 0.75 * t})`
-          : `rgba(155, 140, 255, ${0.25 + 0.75 * t})`;
+          ? `rgba(19, 42, 99, ${0.25 + 0.75 * t})`     // navy strand
+          : `rgba(116, 138, 166, ${0.3 + 0.7 * t})`;   // steel-blue strand
         ctx.lineWidth = 2 + 4 * t;
         ctx.beginPath();
         ctx.moveTo(p1.x, y);
@@ -127,7 +127,7 @@ function drawDNA(phase) {
     for (let y = 0; y < H; y += rungGap) {
       const p = point(y, s);
       if (p.depth < 0.85) continue;
-      ctx.fillStyle = s === 0 ? "rgba(62,230,196,0.9)" : "rgba(155,140,255,0.9)";
+      ctx.fillStyle = s === 0 ? "rgba(19,42,99,0.95)" : "rgba(51,117,198,0.95)";
       ctx.beginPath();
       ctx.arc(p.x, y, 3.5, 0, Math.PI * 2);
       ctx.fill();
@@ -140,6 +140,7 @@ const track = document.querySelector(".scroll-track");
 const stage = document.querySelector(".stage");
 const hero = document.getElementById("hero");
 const bubbleBox = document.getElementById("bubbles");
+const bubbleHeading = document.querySelector(".bubbles-heading");
 const bubbles = [...document.querySelectorAll(".bubble")];
 
 const clamp = (v, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, v));
@@ -157,7 +158,11 @@ function updateScene(p, time) {
   hero.style.transform = `translateY(${-tp * stage.offsetHeight * 0.85}px)`;
   hero.style.opacity = String(1 - clamp(tp * 1.3));
 
-  // Bubbles pop in one after another
+  // "Our Subteams" heading fades in, then the bubbles pop in one after another
+  const hp = easeOut(clamp((p - 0.18) / 0.15));
+  bubbleHeading.style.opacity = String(hp);
+  bubbleHeading.style.transform = `translateY(${(1 - hp) * 20}px)`;
+
   bubbles.forEach((b, i) => {
     const bp = easeOut(clamp((p - 0.22 - i * 0.07) / 0.22));
     const bob = reduceMotion ? 0 : Math.sin(time / 900 + i * 1.3) * 6 * bp;
@@ -182,10 +187,3 @@ function frame(time) {
 window.addEventListener("resize", resizeCanvas);
 resizeCanvas();
 requestAnimationFrame(frame);
-
-// Placeholder: bubbles will link to each subteam once their content is added
-bubbles.forEach(b => {
-  b.addEventListener("click", () => {
-    console.log(`Subteam ${b.dataset.subteam} clicked`);
-  });
-});
