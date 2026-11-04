@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UTBIOME | Biomedical Engineering Design Team</title>
+  <meta name="description" content="UTBIOME is a biomedical engineering design team at the University of Toronto." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ===== Header / navigation (shown on every page) ===== -->
+  <header class="site-header">
+    <a href="#home" class="logo" data-page="home">UT<span>BIOME</span></a>
+
+    <button class="nav-toggle" aria-label="Open menu" aria-expanded="false" aria-controls="site-nav">
+      <span></span><span></span><span></span>
+    </button>
+
+    <nav id="site-nav" class="site-nav">
+      <a href="#home" data-page="home">Home</a>
+      <a href="#about" data-page="about">About Us</a>
+      <a href="#current" data-page="current">Current Projects</a>
+      <a href="#past" data-page="past">Past Projects</a>
+      <a href="#connect" data-page="connect">Connect With Us</a>
+    </nav>
+  </header>
+
+  <!-- ===== DNA strand (fixed on the left side of the home page) ===== -->
+  <canvas id="dna" class="dna" aria-hidden="true"></canvas>
+
+  <main>
+    <!-- ===== HOME ===== -->
+    <section id="page-home" class="page page-home" data-page="home">
+      <!-- The tall track gives the page room to scroll; the stage sticks in view while it does -->
+      <div class="scroll-track">
+        <div class="stage">
+
+          <div class="hero" id="hero">
+            <h1 class="hero-title">UTBIOME</h1>
+            <p class="hero-desc">This is a design team at U of T.</p>
+            <div class="scroll-hint" aria-hidden="true">
+              <span>Scroll</span>
+              <div class="scroll-line"></div>
+            </div>
+          </div>
+
+          <!-- Subteam bubbles: intentionally blank for now. Fill each one in later. -->
+          <div class="bubbles" id="bubbles">
+            <div class="bubble" data-subteam="1" aria-label="Subteam 1"></div>
+            <div class="bubble" data-subteam="2" aria-label="Subteam 2"></div>
+            <div class="bubble" data-subteam="3" aria-label="Subteam 3"></div>
+            <div class="bubble" data-subteam="4" aria-label="Subteam 4"></div>
+            <div class="bubble" data-subteam="5" aria-label="Subteam 5"></div>
+            <div class="bubble" data-subteam="6" aria-label="Subteam 6"></div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== ABOUT US ===== -->
+    <section id="page-about" class="page page-inner" data-page="about" hidden>
+      <div class="inner">
+        <p class="eyebrow">About Us</p>
+        <h2>Who we are</h2>
+        <p>UTBIOME is a student-run biomedical engineering design team at the University of Toronto. Replace this text with your team's mission, history and values.</p>
+      </div>
+    </section>
+
+    <!-- ===== CURRENT PROJECTS ===== -->
+    <section id="page-current" class="page page-inner" data-page="current" hidden>
+      <div class="inner">
+        <p class="eyebrow">Current Projects</p>
+        <h2>What we're building now</h2>
+        <div class="card-grid">
+          <article class="card"><h3>Project name</h3><p>Short description of the project.</p></article>
+          <article class="card"><h3>Project name</h3><p>Short description of the project.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PAST PROJECTS ===== -->
+    <section id="page-past" class="page page-inner" data-page="past" hidden>
+      <div class="inner">
+        <p class="eyebrow">Past Projects</p>
+        <h2>What we've built</h2>
+        <div class="card-grid">
+          <article class="card"><h3>Project name</h3><p>Year · Short description of the project.</p></article>
+          <article class="card"><h3>Project name</h3><p>Year · Short description of the project.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== CONNECT WITH US ===== -->
+    <section id="page-connect" class="page page-inner" data-page="connect" hidden>
+      <div class="inner">
+        <p class="eyebrow">Connect With Us</p>
+        <h2>Get in touch</h2>
+        <p>Interested in joining, sponsoring or collaborating? Add your email and social links here.</p>
+        <ul class="contact-list">
+          <li><span>Email</span> team@example.com</li>
+          <li><span>Instagram</span> @utbiome</li>
+          <li><span>LinkedIn</span> UTBIOME</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
