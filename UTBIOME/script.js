@@ -1,17 +1,22 @@
 /* =========================================================
    UTBIOME site script
    1. Page switching (header links)
-   2. DNA double helix drawn on a canvas, twisting with scroll
-   3. Scroll animation: title flies up, subteam bubbles appear
+   2. DNA double helix drawn on a canvas, twisting slowly with scroll
+   3. Scroll animation: title flies up, the subteam atom appears
+   4. Atom: six subteam electrons orbit a nucleus; hovering one
+      stops the orbit, enlarges it and shrinks the others
    ========================================================= */
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const clamp = (v, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, v));
+const easeOut = t => 1 - Math.pow(1 - t, 3);
 
 /* ---------- 1. Page switching ---------- */
 const pages = document.querySelectorAll(".page");
 const navLinks = document.querySelectorAll(".site-nav a");
 const navToggle = document.querySelector(".nav-toggle");
 const nav = document.querySelector(".site-nav");
+let pendingTarget = null;   // card to scroll to after an electron is clicked
 
 function showPage() {
   const name = (location.hash || "#home").slice(1);
@@ -23,6 +28,21 @@ function showPage() {
 
   window.scrollTo(0, 0);
   closeMenu();
+  setHover(null);
+
+  // Jump to the specific project / section the electron represents
+  if (pendingTarget) {
+    const el = document.getElementById(pendingTarget);
+    pendingTarget = null;
+    if (el) {
+      requestAnimationFrame(() => {
+        el.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
+        el.classList.remove("flash");
+        void el.offsetWidth;            // restart the highlight animation
+        el.classList.add("flash");
+      });
+    }
+  }
 }
 
 function closeMenu() {
@@ -35,22 +55,19 @@ navToggle.addEventListener("click", () => {
   navToggle.setAttribute("aria-expanded", String(open));
 });
 
-window.addEventListener("hashchange", showPage);
-showPage();
-
 /* ---------- 2. DNA helix ---------- */
 const canvas = document.getElementById("dna");
 const ctx = canvas.getContext("2d");
 let W = 0, H = 0;
 
-// Base-pair colours (A–T and C–G pairs) in the UTBIOME palette, picked in a fixed pattern
+// Base-pair colours in the UTBIOME palette, picked in a fixed pattern
 const PAIRS = [
-  ["#3375c6", "#132a63"],
-  ["#6bb6f9", "#48648c"],
-  ["#132a63", "#3375c6"],
-  ["#48648c", "#6bb6f9"],
+  ["#ffffff", "#81acda"],
+  ["#6484c2", "#d7e3f6"],
+  ["#81acda", "#ffffff"],
+  ["#d7e3f6", "#6484c2"],
 ];
-const pairFor = i => PAIRS[(i * 7 + (i >> 2)) % PAIRS.length];
+const pairFor = i => PAIRS[((i * 7 + (i >> 2)) % PAIRS.length + PAIRS.length) % PAIRS.length];
 
 function resizeCanvas() {
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -65,11 +82,14 @@ function resizeCanvas() {
 function drawDNA(phase) {
   ctx.clearRect(0, 0, W, H);
 
+  // Everything scales with the canvas width so the helix fills its half of the screen
+  const size = Math.max(W, 160);
   const cx = W / 2;
-  const amp = W * 0.32;                 // how wide the helix swings
-  const k = (Math.PI * 2) / 280;        // one full turn every 280px
-  const rungGap = 18;                   // spacing of base pairs
-  const step = 4;                       // strand segment length
+  const amp = size * 0.36;                    // how wide the helix swings
+  const k = (Math.PI * 2) / (size * 1.5);     // one full turn every 1.5 × width
+  const rungGap = Math.max(18, size / 15);    // spacing of base pairs
+  const step = 4;                             // strand segment length
+  const thick = size / 110;                   // strand thickness
 
   // A point on strand s (0 or 1) at height y
   const point = (y, s) => {
@@ -84,11 +104,11 @@ function drawDNA(phase) {
         const p1 = point(y, s), p2 = point(y + step, s);
         const d = (p1.depth + p2.depth) / 2;
         if ((d >= 0) !== front) continue;
-        const t = (d + 1) / 2;          // 0 = far, 1 = near
+        const t = (d + 1) / 2;                // 0 = far, 1 = near
         ctx.strokeStyle = s === 0
-          ? `rgba(19, 42, 99, ${0.25 + 0.75 * t})`     // navy strand
-          : `rgba(116, 138, 166, ${0.3 + 0.7 * t})`;   // steel-blue strand
-        ctx.lineWidth = 2 + 4 * t;
+          ? `rgba(255, 255, 255, ${0.25 + 0.75 * t})`
+          : `rgba(129, 172, 218, ${0.3 + 0.7 * t})`;
+        ctx.lineWidth = thick * (1 + 2 * t);
         ctx.beginPath();
         ctx.moveTo(p1.x, y);
         ctx.lineTo(p2.x, y + step);
@@ -99,16 +119,16 @@ function drawDNA(phase) {
 
   // Base pairs (rungs) connect the two strands
   const drawRungs = () => {
-    ctx.lineCap = "round";
-    // offset so rungs slide smoothly along as the helix twists
-    const offset = ((phase / k) % rungGap + rungGap) % rungGap;
+    const shift = phase / k;                  // rungs move with the twist
+    const offset = ((shift % rungGap) + rungGap) % rungGap;
+    const base = Math.floor(shift / rungGap);
     for (let y = -offset, i = 0; y < H + rungGap; y += rungGap, i++) {
       const a = point(y, 0), b = point(y, 1);
       const mid = (a.x + b.x) / 2;
-      const t = 1 - Math.abs(a.depth) * 0.55;   // rungs fade when seen edge-on
-      const [c1, c2] = pairFor(i + Math.floor(phase / (k * rungGap)));
-      ctx.globalAlpha = 0.35 + 0.5 * t;
-      ctx.lineWidth = 2.5;
+      const t = 1 - Math.abs(a.depth) * 0.55; // rungs fade when seen edge-on
+      const [c1, c2] = pairFor(i + base);
+      ctx.globalAlpha = 0.3 + 0.55 * t;
+      ctx.lineWidth = thick * 1.3;
       ctx.strokeStyle = c1;
       ctx.beginPath(); ctx.moveTo(a.x, y); ctx.lineTo(mid, y); ctx.stroke();
       ctx.strokeStyle = c2;
@@ -121,30 +141,16 @@ function drawDNA(phase) {
   drawStrands(false);
   drawRungs();
   drawStrands(true);
-
-  // Soft glowing nodes where each strand is closest to the viewer
-  for (let s = 0; s < 2; s++) {
-    for (let y = 0; y < H; y += rungGap) {
-      const p = point(y, s);
-      if (p.depth < 0.85) continue;
-      ctx.fillStyle = s === 0 ? "rgba(19,42,99,0.95)" : "rgba(51,117,198,0.95)";
-      ctx.beginPath();
-      ctx.arc(p.x, y, 3.5, 0, Math.PI * 2);
-      ctx.fill();
-    }
-  }
 }
 
 /* ---------- 3. Scroll animation ---------- */
 const track = document.querySelector(".scroll-track");
 const stage = document.querySelector(".stage");
 const hero = document.getElementById("hero");
-const bubbleBox = document.getElementById("bubbles");
-const bubbleHeading = document.querySelector(".bubbles-heading");
-const bubbles = [...document.querySelectorAll(".bubble")];
-
-const clamp = (v, lo = 0, hi = 1) => Math.min(hi, Math.max(lo, v));
-const easeOut = t => 1 - Math.pow(1 - t, 3);
+const atomWrap = document.getElementById("atomWrap");
+const atom = document.getElementById("atom");
+const nucleus = atom.querySelector(".nucleus");
+const electrons = [...atom.querySelectorAll(".electron")];
 
 // 0 at the top of the home page, 1 once the animation has fully played
 function scrollProgress() {
@@ -152,38 +158,124 @@ function scrollProgress() {
   return range > 0 ? clamp(window.scrollY / range) : 0;
 }
 
-function updateScene(p, time) {
-  // Title flies up and fades out during the first ~30% of the scroll
-  const tp = easeOut(clamp(p / 0.3));
+let appear = 0;   // how far the atom has appeared (0–1)
+
+function updateScene(p) {
+  // Title flies up and fades out during the first part of the scroll
+  const tp = easeOut(clamp(p / 0.28));
   hero.style.transform = `translateY(${-tp * stage.offsetHeight * 0.85}px)`;
   hero.style.opacity = String(1 - clamp(tp * 1.3));
 
-  // "Our Subteams" heading fades in, then the bubbles pop in one after another
-  const hp = easeOut(clamp((p - 0.18) / 0.15));
-  bubbleHeading.style.opacity = String(hp);
-  bubbleHeading.style.transform = `translateY(${(1 - hp) * 20}px)`;
-
-  bubbles.forEach((b, i) => {
-    const bp = easeOut(clamp((p - 0.22 - i * 0.07) / 0.22));
-    const bob = reduceMotion ? 0 : Math.sin(time / 900 + i * 1.3) * 6 * bp;
-    b.style.opacity = String(bp);
-    b.style.transform = `translateY(${(1 - bp) * 60 + bob}px) scale(${0.4 + 0.6 * bp})`;
-  });
-  bubbleBox.classList.toggle("live", p > 0.4);
+  // Atom grows in and the electrons spread out from the nucleus
+  appear = easeOut(clamp((p - 0.2) / 0.3));
+  atomWrap.style.opacity = String(appear);
+  atom.style.transform = `scale(${0.6 + 0.4 * appear})`;
+  atomWrap.classList.toggle("live", appear > 0.9);
+  if (appear <= 0.9 && hovered !== null) setHover(null);
 }
 
+/* ---------- 4. Atom: orbiting electrons ---------- */
+const ORBIT_RX = 0.80;                 // orbit size as a fraction of the atom's radius
+const ORBIT_RY = 0.31;                 //   (matches the <ellipse> in the HTML)
+const ORBIT_TILT = [0, 60, 120].map(d => (d * Math.PI) / 180);
+const ORBIT_SPEED = [0.30, 0.36, 0.42];   // radians per second (slow, so labels stay readable)
+
+let hovered = null;          // index of the enlarged electron, or null
+let nucleusHover = false;
+let orbitTime = 0;
+let lastPointer = "mouse";
+const scales = electrons.map(() => 0.9);
+
+function setHover(i) {
+  hovered = i;
+  atom.classList.toggle("paused", i !== null || nucleusHover);
+  electrons.forEach((e, j) => {
+    e.classList.toggle("active", j === i);
+    e.classList.toggle("dim", i !== null && j !== i);
+  });
+}
+
+function updateAtom(dt) {
+  const paused = hovered !== null || nucleusHover || reduceMotion;
+  if (!paused) orbitTime += dt;
+
+  const R = atom.offsetWidth / 2;
+  const rx = R * ORBIT_RX * appear;
+  const ry = R * ORBIT_RY * appear;
+  const ease = clamp(dt * 10);
+
+  electrons.forEach((el, i) => {
+    const o = i % 3;                                   // two electrons per orbit
+    const start = (i >= 3 ? Math.PI : 0) + o * 2.1;    // opposite sides of the orbit
+    const theta = start + orbitTime * ORBIT_SPEED[o];
+
+    // Point on a flat ellipse, then rotate it by the orbit's tilt
+    const ex = rx * Math.cos(theta);
+    const ey = ry * Math.sin(theta);
+    const tilt = ORBIT_TILT[o];
+    const x = ex * Math.cos(tilt) - ey * Math.sin(tilt);
+    const y = ex * Math.sin(tilt) + ey * Math.cos(tilt);
+    const depth = Math.sin(theta);                     // > 0 = in front of the nucleus
+
+    const target =
+      hovered === null ? 0.82 + 0.18 * depth :
+      hovered === i ? 1.6 : 0.6;
+    scales[i] += (target - scales[i]) * ease;
+
+    el.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px) scale(${scales[i]})`;
+    el.style.zIndex = hovered === i ? 20 : depth > 0 ? 6 : 3;
+    el.style.opacity =
+      hovered === i ? 1 :
+      hovered !== null ? 0.7 : 0.8 + 0.2 * depth;
+  });
+}
+
+electrons.forEach((el, i) => {
+  el.addEventListener("pointerenter", e => { if (e.pointerType === "mouse") setHover(i); });
+  el.addEventListener("pointerleave", e => { if (e.pointerType === "mouse") setHover(null); });
+  el.addEventListener("focus", () => setHover(i));
+  el.addEventListener("blur", () => setHover(null));
+
+  el.addEventListener("click", e => {
+    // On touch screens the first tap enlarges the electron, the second opens it
+    if (lastPointer !== "mouse" && hovered !== i) {
+      e.preventDefault();
+      setHover(i);
+      return;
+    }
+    pendingTarget = el.dataset.target;
+  });
+});
+
+nucleus.addEventListener("pointerenter", e => {
+  if (e.pointerType === "mouse") { nucleusHover = true; setHover(hovered); }
+});
+nucleus.addEventListener("pointerleave", () => { nucleusHover = false; setHover(hovered); });
+
+document.addEventListener("pointerdown", e => {
+  lastPointer = e.pointerType;
+  if (e.pointerType !== "mouse" && !e.target.closest(".electron")) setHover(null);
+}, true);
+
 /* ---------- Animation loop ---------- */
+let lastTime = performance.now();
+
 function frame(time) {
+  const dt = Math.min((time - lastTime) / 1000, 0.1);
+  lastTime = time;
+
   if (document.body.classList.contains("on-home")) {
-    const p = scrollProgress();
-    // Twist comes from scrolling, plus a slow idle rotation so it always feels alive
-    const phase = window.scrollY * 0.012 + (reduceMotion ? 0 : time * 0.0004);
+    // Slow twist from scrolling, plus a gentle idle rotation so it always feels alive
+    const phase = window.scrollY * 0.0045 + (reduceMotion ? 0 : time * 0.00015);
     drawDNA(phase);
-    updateScene(p, time);
+    updateScene(scrollProgress());
+    updateAtom(dt);
   }
   requestAnimationFrame(frame);
 }
 
+window.addEventListener("hashchange", showPage);
 window.addEventListener("resize", resizeCanvas);
+showPage();
 resizeCanvas();
 requestAnimationFrame(frame);
