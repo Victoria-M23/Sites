@@ -294,6 +294,7 @@ body:not(.on-home) .dna { opacity: 0; }
     0 0 0 6px rgba(255, 255, 255, 0.15),
     0 0 60px rgba(129, 172, 218, 0.55);
   animation: glow 3.5s ease-in-out infinite;
+  pointer-events: none;   /* not interactive: hovering it does nothing, and bubbles behind it stay hoverable */
 }
 .nucleus span {
   display: block;
@@ -481,6 +482,16 @@ body:not(.on-home) .dna { opacity: 0; }
 }
 
 .person { padding: 18px 20px; border-top-color: var(--soft); }
+.person-photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  margin-bottom: 14px;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid #d7e3f6;   /* so the white placeholder still shows on the white card */
+}
 .person h5 { color: var(--ink); font-size: 0.98rem; font-weight: 600; margin-bottom: 0.2rem; }
 
 .tag {

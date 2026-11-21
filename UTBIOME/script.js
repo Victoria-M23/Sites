@@ -172,7 +172,6 @@ const goalsWrap = document.getElementById("goalsWrap");
 const goalCards = [...goalsWrap.querySelectorAll(".goal")];
 const atomWrap = document.getElementById("atomWrap");
 const atom = document.getElementById("atom");
-const nucleus = atom.querySelector(".nucleus");
 const electrons = [...atom.querySelectorAll(".electron")];
 
 // 0 at the top of the home page, 1 once the animation has fully played
@@ -222,7 +221,6 @@ const ORBIT_TILT = [0, 60, 120].map(d => (d * Math.PI) / 180);
 const ORBIT_SPEED = [0.30, 0.36, 0.42];   // radians per second (slow, so labels stay readable)
 
 let hovered = null;          // index of the enlarged electron, or null
-let nucleusHover = false;
 let orbitTime = 0;
 let lastPointer = "mouse";
 const scales = electrons.map(() => 0.9);
@@ -230,7 +228,7 @@ const PER_ORBIT = [0, 1, 2].map(o => electrons.filter((_, i) => i % 3 === o).len
 
 function setHover(i) {
   hovered = i;
-  atom.classList.toggle("paused", i !== null || nucleusHover);
+  atom.classList.toggle("paused", i !== null);
   electrons.forEach((e, j) => {
     e.classList.toggle("active", j === i);
     e.classList.toggle("dim", i !== null && j !== i);
@@ -238,7 +236,7 @@ function setHover(i) {
 }
 
 function updateAtom(dt) {
-  const paused = hovered !== null || nucleusHover || reduceMotion;
+  const paused = hovered !== null || reduceMotion;   // only hovering a subteam bubble pauses the orbit
   if (!paused) orbitTime += dt;
 
   const R = atom.offsetWidth / 2;
@@ -288,11 +286,6 @@ electrons.forEach((el, i) => {
     pendingTarget = el.dataset.target;
   });
 });
-
-nucleus.addEventListener("pointerenter", e => {
-  if (e.pointerType === "mouse") { nucleusHover = true; setHover(hovered); }
-});
-nucleus.addEventListener("pointerleave", () => { nucleusHover = false; setHover(hovered); });
 
 document.addEventListener("pointerdown", e => {
   lastPointer = e.pointerType;
