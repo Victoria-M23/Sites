@@ -102,24 +102,25 @@
         </div>
       </div>
 
-      <!-- Sponsors: the DNA strand ends just above this section.
-           To add a sponsor, replace the placeholder image src (and alt text) with the logo file. -->
-      <div class="sponsors" id="sponsors">
-        <h2 class="section-title">Our Sponsors</h2>
-        <p class="section-lead">Thank you to the organizations that make our work possible.</p>
-        <div class="sponsor-scroller">
-          <button class="sponsor-btn" data-dir="-1" aria-label="Scroll sponsors left">&#8249;</button>
-          <ul class="sponsor-track" id="sponsorTrack" tabindex="0" aria-label="Sponsors">
-            <li class="sponsor"><img src="assets/sponsors/placeholder.svg" alt="Sponsor logo coming soon" /></li>
-            <li class="sponsor"><img src="assets/sponsors/placeholder.svg" alt="Sponsor logo coming soon" /></li>
-            <li class="sponsor"><img src="assets/sponsors/placeholder.svg" alt="Sponsor logo coming soon" /></li>
-            <li class="sponsor"><img src="assets/sponsors/placeholder.svg" alt="Sponsor logo coming soon" /></li>
-            <li class="sponsor"><img src="assets/sponsors/placeholder.svg" alt="Sponsor logo coming soon" /></li>
-            <li class="sponsor"><img src="assets/sponsors/placeholder.svg" alt="Sponsor logo coming soon" /></li>
-            <li class="sponsor"><img src="assets/sponsors/placeholder.svg" alt="Sponsor logo coming soon" /></li>
-            <li class="sponsor"><img src="assets/sponsors/placeholder.svg" alt="Sponsor logo coming soon" /></li>
+      <!-- Partners: the DNA strand ends just above this section.
+           The row scrolls by itself and pauses on hover. To add a partner, add an <li> with its logo
+           (a PNG with a transparent background) in assets/partners/. -->
+      <div class="partners" id="partners">
+        <h2 class="section-title">Our Partners</h2>
+        <p class="section-lead">The labs, hospitals and teams we work alongside.</p>
+        <div class="partner-scroller">
+          <button class="partner-btn" data-dir="-1" aria-label="Scroll partners left">&#8249;</button>
+          <ul class="partner-track" id="partnerTrack" tabindex="0" aria-label="Partners">
+            <li class="partner"><img src="assets/partners/stmichaels.png" alt="St. Michael’s Hospital" /></li>
+            <li class="partner"><img src="assets/partners/sedlab.png" alt="SEDlab – Safety, Equity, &amp; Design" /></li>
+            <li class="partner"><img src="assets/partners/lanlab.png" alt="LAN Lab" /></li>
+            <li class="partner"><img src="assets/partners/truenorth.png" alt="True North Biomedical Competition" /></li>
+            <li class="partner"><img src="assets/partners/utmist.png" alt="UTMIST" /></li>
+            <li class="partner"><img src="assets/partners/alinovate.png" alt="Alinovate" /></li>
+            <li class="partner"><img src="assets/partners/wearable.png" alt="UofT Wearable" /></li>
+            <li class="partner"><img src="assets/partners/neurotech.png" alt="NeuroTech UofT" /></li>
           </ul>
-          <button class="sponsor-btn" data-dir="1" aria-label="Scroll sponsors right">&#8250;</button>
+          <button class="partner-btn" data-dir="1" aria-label="Scroll partners right">&#8250;</button>
         </div>
       </div>
     </section>
@@ -130,6 +131,10 @@
         <p class="eyebrow">About Us</p>
         <h2>Who we are</h2>
         <p>We are an undergraduate-focused, multidisciplinary design team managing biomedical research and development projects. Since 2018, we have worked with stakeholders at the University of Toronto and nearby hospitals to deliver tailored, high-impact projects, which we present at conferences and nation-wide competitions.</p>
+
+        <!-- Mural: a circle of blank tiles. Hovering a tile reveals a photo for ~3 seconds.
+             The photos are listed in MURAL_IMAGES in script.js. -->
+        <div class="mural" id="mural" aria-hidden="true"></div>
 
         <h3 class="sub-title">Executive Team</h3>
 
