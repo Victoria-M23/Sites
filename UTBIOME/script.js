@@ -7,6 +7,7 @@
    4. Atom: subteam electrons orbit a nucleus; hovering one
       stops the orbit, enlarges it and shrinks the others
    5. Partners row: scrolls by itself in a loop; the DNA strand ends above it
+   6. About Us mural: a circle of tiles that reveal photos on hover
    ========================================================= */
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -333,6 +334,59 @@ document.querySelectorAll(".partner-btn").forEach(b => b.addEventListener("click
   partnerPos = x;
   partnerTrack.scrollTo({ left: x, behavior: "auto" });
 }));
+
+/* ---------- 6. About Us mural ---------- */
+// Swap these placeholders for real photos (any size; they are cropped to squares).
+// Tiles cycle through the list, so a few photos are enough to fill the circle.
+const MURAL_IMAGES = [
+  "assets/mural/placeholder-1.svg",
+  "assets/mural/placeholder-2.svg",
+  "assets/mural/placeholder-3.svg",
+  "assets/mural/placeholder-4.svg",
+  "assets/mural/placeholder-5.svg",
+  "assets/mural/placeholder-6.svg",
+];
+const MURAL_TILES_ACROSS = 19;
+const MURAL_SHOW_MS = 3000;          // how long a photo stays before fading back
+
+const mural = document.getElementById("mural");
+if (mural) {
+  const n = MURAL_TILES_ACROSS;
+  const r = n / 2;
+  mural.style.setProperty("--n", n);
+  let k = 0;
+  for (let row = 0; row < n; row++) {
+    for (let col = 0; col < n; col++) {
+      const tile = document.createElement("div");
+      tile.className = "tile";
+      // keep only the tiles whose centre lies inside the circle
+      if (Math.hypot(col + 0.5 - r, row + 0.5 - r) > r) {
+        tile.classList.add("empty");
+      } else {
+        const img = document.createElement("img");
+        img.src = MURAL_IMAGES[(k * 7 + row) % MURAL_IMAGES.length];  // mix them up a bit
+        img.alt = "";
+        img.loading = "lazy";
+        tile.appendChild(img);
+        k++;
+      }
+      mural.appendChild(tile);
+    }
+  }
+
+  const reveal = tile => {
+    if (!tile || tile.classList.contains("empty")) return;
+    tile.classList.add("on");
+    clearTimeout(tile._timer);
+    tile._timer = setTimeout(() => tile.classList.remove("on"), MURAL_SHOW_MS);
+  };
+  mural.addEventListener("pointerover", e => reveal(e.target.closest(".tile")));
+  // dragging a finger across the mural reveals tiles too
+  mural.addEventListener("pointermove", e => {
+    if (e.pointerType !== "mouse") reveal(document.elementFromPoint(e.clientX, e.clientY)?.closest(".tile"));
+  });
+  mural.style.touchAction = "pan-y";
+}
 
 /* ---------- Animation loop ---------- */
 let lastTime = performance.now();
