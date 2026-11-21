@@ -2,9 +2,11 @@
    UTBIOME site script
    1. Page switching (header links)
    2. DNA double helix drawn on a canvas, twisting slowly with scroll
-   3. Scroll animation: title flies up, the subteam atom appears
-   4. Atom: six subteam electrons orbit a nucleus; hovering one
+   3. Scroll animation: title flies up, the three goals appear,
+      then the goals leave and the subteam atom appears
+   4. Atom: subteam electrons orbit a nucleus; hovering one
       stops the orbit, enlarges it and shrinks the others
+   5. Sponsors row: arrow buttons; the DNA strand ends above it
    ========================================================= */
 
 const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -79,7 +81,8 @@ function resizeCanvas() {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
-function drawDNA(phase) {
+// endY: where the strand ends (canvas px). The two strands taper together there.
+function drawDNA(phase, endY = Infinity) {
   ctx.clearRect(0, 0, W, H);
 
   // Everything scales with the canvas width so the helix fills its half of the screen
@@ -91,17 +94,23 @@ function drawDNA(phase) {
   const step = 4;                             // strand segment length
   const thick = size / 110;                   // strand thickness
 
+  const taper = size * 0.7;                   // length over which the strands close up at the end
+  const bottom = Math.min(H + step, endY);
+  if (bottom <= 0) return;
+
   // A point on strand s (0 or 1) at height y
   const point = (y, s) => {
     const a = y * k + phase + s * Math.PI;
-    return { x: cx + amp * Math.sin(a), depth: Math.cos(a) }; // depth > 0 = towards viewer
+    const close = endY === Infinity ? 1 : easeOut(clamp((endY - y) / taper));
+    return { x: cx + amp * close * Math.sin(a), depth: Math.cos(a) * close }; // depth > 0 = towards viewer
   };
 
   // Draw strand segments that are either behind (front=false) or in front (front=true)
   const drawStrands = front => {
     for (let s = 0; s < 2; s++) {
-      for (let y = -step; y < H + step; y += step) {
-        const p1 = point(y, s), p2 = point(y + step, s);
+      for (let y = -step; y < bottom; y += step) {
+        const y2 = Math.min(y + step, bottom);
+        const p1 = point(y, s), p2 = point(y2, s);
         const d = (p1.depth + p2.depth) / 2;
         if ((d >= 0) !== front) continue;
         const t = (d + 1) / 2;                // 0 = far, 1 = near
@@ -111,7 +120,7 @@ function drawDNA(phase) {
         ctx.lineWidth = thick * (1 + 2 * t);
         ctx.beginPath();
         ctx.moveTo(p1.x, y);
-        ctx.lineTo(p2.x, y + step);
+        ctx.lineTo(p2.x, y2);
         ctx.stroke();
       }
     }
@@ -122,7 +131,7 @@ function drawDNA(phase) {
     const shift = phase / k;                  // rungs move with the twist
     const offset = ((shift % rungGap) + rungGap) % rungGap;
     const base = Math.floor(shift / rungGap);
-    for (let y = -offset, i = 0; y < H + rungGap; y += rungGap, i++) {
+    for (let y = -offset, i = 0; y < Math.min(H + rungGap, endY - rungGap * 0.6); y += rungGap, i++) {
       const a = point(y, 0), b = point(y, 1);
       const mid = (a.x + b.x) / 2;
       const t = 1 - Math.abs(a.depth) * 0.55; // rungs fade when seen edge-on
@@ -141,12 +150,26 @@ function drawDNA(phase) {
   drawStrands(false);
   drawRungs();
   drawStrands(true);
+
+  // A small bead where the two strands meet marks the end of the helix
+  if (endY < H + step) {
+    ctx.fillStyle = "#ffffff";
+    ctx.shadowColor = "rgba(129, 172, 218, 0.9)";
+    ctx.shadowBlur = thick * 6;
+    ctx.beginPath();
+    ctx.arc(cx, endY, thick * 2.6, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+  }
 }
 
 /* ---------- 3. Scroll animation ---------- */
 const track = document.querySelector(".scroll-track");
 const stage = document.querySelector(".stage");
 const hero = document.getElementById("hero");
+const goalsWrap = document.getElementById("goalsWrap");
+const goalCards = [...goalsWrap.querySelectorAll(".goal")];
+const sponsors = document.getElementById("sponsors");
 const atomWrap = document.getElementById("atomWrap");
 const atom = document.getElementById("atom");
 const nucleus = atom.querySelector(".nucleus");
@@ -161,13 +184,27 @@ function scrollProgress() {
 let appear = 0;   // how far the atom has appeared (0–1)
 
 function updateScene(p) {
-  // Title flies up and fades out during the first part of the scroll
-  const tp = easeOut(clamp(p / 0.28));
-  hero.style.transform = `translateY(${-tp * stage.offsetHeight * 0.85}px)`;
+  const h = stage.offsetHeight;
+
+  // 1. Title flies up and fades out
+  const tp = easeOut(clamp(p / 0.18));
+  hero.style.transform = `translateY(${-tp * h * 0.85}px)`;
   hero.style.opacity = String(1 - clamp(tp * 1.3));
 
-  // Atom grows in and the electrons spread out from the nucleus
-  appear = easeOut(clamp((p - 0.2) / 0.3));
+  // 2. Goals rise in one box at a time, hold, then fly up and out
+  const gIn = clamp((p - 0.1) / 0.2);
+  const gOut = easeOut(clamp((p - 0.5) / 0.14));
+  goalsWrap.style.opacity = String(Math.min(clamp(gIn * 3), 1 - gOut));
+  goalsWrap.style.transform = `translateY(${-gOut * h * 0.6}px)`;
+  goalsWrap.style.pointerEvents = gIn > 0.9 && gOut < 0.1 ? "auto" : "none";
+  goalCards.forEach((card, i) => {
+    const c = easeOut(clamp((gIn - i * 0.2) / 0.6));
+    card.style.opacity = String(c);
+    card.style.transform = `translateY(${(1 - c) * 60}px)`;
+  });
+
+  // 3. Atom grows in and the electrons spread out from the nucleus
+  appear = easeOut(clamp((p - 0.6) / 0.22));
   atomWrap.style.opacity = String(appear);
   atom.style.transform = `scale(${0.6 + 0.4 * appear})`;
   atomWrap.classList.toggle("live", appear > 0.9);
@@ -185,6 +222,7 @@ let nucleusHover = false;
 let orbitTime = 0;
 let lastPointer = "mouse";
 const scales = electrons.map(() => 0.9);
+const PER_ORBIT = [0, 1, 2].map(o => electrons.filter((_, i) => i % 3 === o).length || 1);
 
 function setHover(i) {
   hovered = i;
@@ -205,8 +243,8 @@ function updateAtom(dt) {
   const ease = clamp(dt * 10);
 
   electrons.forEach((el, i) => {
-    const o = i % 3;                                   // two electrons per orbit
-    const start = (i >= 3 ? Math.PI : 0) + o * 2.1;    // opposite sides of the orbit
+    const o = i % 3;                                   // electrons share the 3 orbits in turn
+    const start = o * 2.1 + Math.floor(i / 3) * (Math.PI * 2 / PER_ORBIT[o]); // evenly spaced on each orbit
     const theta = start + orbitTime * ORBIT_SPEED[o];
 
     // Point on a flat ellipse, then rotate it by the orbit's tilt
@@ -257,6 +295,23 @@ document.addEventListener("pointerdown", e => {
   if (e.pointerType !== "mouse" && !e.target.closest(".electron")) setHover(null);
 }, true);
 
+/* ---------- 5. Sponsors row ---------- */
+const sponsorTrack = document.getElementById("sponsorTrack");
+const sponsorBtns = document.querySelectorAll(".sponsor-btn");
+
+function updateSponsorBtns() {
+  const max = sponsorTrack.scrollWidth - sponsorTrack.clientWidth - 2;
+  sponsorBtns.forEach(b => {
+    b.disabled = b.dataset.dir === "-1" ? sponsorTrack.scrollLeft <= 2 : sponsorTrack.scrollLeft >= max;
+  });
+}
+sponsorBtns.forEach(b => b.addEventListener("click", () => {
+  sponsorTrack.scrollBy({ left: Number(b.dataset.dir) * sponsorTrack.clientWidth * 0.8, behavior: reduceMotion ? "auto" : "smooth" });
+}));
+sponsorTrack.addEventListener("scroll", updateSponsorBtns, { passive: true });
+window.addEventListener("resize", updateSponsorBtns);
+updateSponsorBtns();
+
 /* ---------- Animation loop ---------- */
 let lastTime = performance.now();
 
@@ -267,7 +322,9 @@ function frame(time) {
   if (document.body.classList.contains("on-home")) {
     // Slow twist from scrolling, plus a gentle idle rotation so it always feels alive
     const phase = window.scrollY * 0.0045 + (reduceMotion ? 0 : time * 0.00015);
-    drawDNA(phase);
+    // The strand ends a little above the sponsors section as it scrolls into view
+    const endY = sponsors.getBoundingClientRect().top - canvas.getBoundingClientRect().top - 50;
+    drawDNA(phase, endY < H + 200 ? endY : Infinity);
     updateScene(scrollProgress());
     updateAtom(dt);
   }

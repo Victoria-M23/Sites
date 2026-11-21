@@ -53,8 +53,29 @@
             </div>
           </div>
 
-          <!-- Subteam "atom": a nucleus with six subteam electrons orbiting it.
-               Hover an electron to stop the orbit and enlarge it. -->
+          <!-- Goals: appear first after the title, as three centred boxes -->
+          <div class="goals-wrap" id="goalsWrap">
+            <h2 class="section-title">Our Goals</h2>
+            <p class="section-lead">UTBIOME is dedicated to bridging the gap between education and real-world application.</p>
+            <div class="goals">
+              <article class="card goal">
+                <h3>Impact</h3>
+                <p>Develop and implement innovative biomedical devices that meet the real needs of individuals and communities.</p>
+              </article>
+              <article class="card goal">
+                <h3>Education</h3>
+                <p>Give undergraduate students hands-on exposure to biomedical engineering.</p>
+              </article>
+              <article class="card goal">
+                <h3>Growth</h3>
+                <p>Foster leadership, collaboration between teams, and the skills members need to grow.</p>
+              </article>
+            </div>
+          </div>
+
+          <!-- Subteam "atom": a nucleus with the current subteams orbiting it.
+               Hover an electron to stop the orbit and enlarge it.
+               Each data-target matches the id of a card on the Current Projects page. -->
           <div class="atom-wrap" id="atomWrap">
             <div class="atom" id="atom">
               <svg class="orbits" viewBox="-100 -100 200 200" aria-hidden="true">
@@ -65,11 +86,15 @@
 
               <a class="nucleus" href="#current"><span>Our</span>Subteams</a>
 
-              <a class="electron" href="#current" data-target="proj-laser"><span>Laser Polyp Removal</span></a>
-              <a class="electron" href="#current" data-target="proj-gene"><span>Functional Gene Expression</span></a>
-              <a class="electron" href="#current" data-target="proj-ast"><span>Antimicrobial Susceptibility Testing</span></a>
-              <a class="electron" href="#current" data-target="proj-micro"><span>Microfluidic Blood Cell Analysis</span></a>
-              <a class="electron" href="#current" data-target="proj-comp"><span>Competition</span></a>
+              <a class="electron" href="#current" data-target="proj-comp"><span>True North Competition</span></a>
+              <a class="electron" href="#current" data-target="proj-research"><span>Research Paper</span></a>
+              <a class="electron" href="#current" data-target="proj-orthobreathe"><span>OrthoBreathe</span></a>
+              <a class="electron" href="#current" data-target="proj-meg2truth"><span>MEG2Truth</span></a>
+              <a class="electron" href="#current" data-target="proj-wearables"><span>Wearables</span></a>
+              <a class="electron" href="#current" data-target="proj-microfluidics"><span>Microfluidics</span></a>
+              <a class="electron" href="#current" data-target="proj-ast"><span>AST Microscope</span></a>
+              <a class="electron" href="#current" data-target="proj-cpr"><span>CPR Feedback</span></a>
+              <a class="electron" href="#current" data-target="proj-eeg"><span>EEG Elbow</span></a>
               <a class="electron" href="#about" data-target="director-board"><span>Director Board</span></a>
             </div>
           </div>
@@ -77,25 +102,24 @@
         </div>
       </div>
 
-      <!-- Goals, below the scroll animation -->
-      <div class="home-after">
-        <div class="inner">
-          <h2 class="section-title">Our Goals</h2>
-          <p class="section-lead">UTBIOME is dedicated to bridging the gap between education and real-world application.</p>
-          <div class="card-grid goals">
-            <article class="card">
-              <h3>Impact</h3>
-              <p>Develop and implement innovative biomedical devices that meet the real needs of individuals and communities.</p>
-            </article>
-            <article class="card">
-              <h3>Education</h3>
-              <p>Give undergraduate students hands-on exposure to biomedical engineering.</p>
-            </article>
-            <article class="card">
-              <h3>Growth</h3>
-              <p>Foster leadership, collaboration between teams, and the skills members need to grow.</p>
-            </article>
-          </div>
+      <!-- Sponsors: the DNA strand ends just above this section.
+           To add a sponsor, replace the placeholder image src (and alt text) with the logo file. -->
+      <div class="sponsors" id="sponsors">
+        <h2 class="section-title">Our Sponsors</h2>
+        <p class="section-lead">Thank you to the organizations that make our work possible.</p>
+        <div class="sponsor-scroller">
+          <button class="sponsor-btn" data-dir="-1" aria-label="Scroll sponsors left">&#8249;</button>
+          <ul class="sponsor-track" id="sponsorTrack" tabindex="0" aria-label="Sponsors">
+            <li class="sponsor"><img src="assets/sponsors/placeholder.svg" alt="Sponsor logo coming soon" /></li>
+            <li class="sponsor"><img src="assets/sponsors/placeholder.svg" alt="Sponsor logo coming soon" /></li>
+            <li class="sponsor"><img src="assets/sponsors/placeholder.svg" alt="Sponsor logo coming soon" /></li>
+            <li class="sponsor"><img src="assets/sponsors/placeholder.svg" alt="Sponsor logo coming soon" /></li>
+            <li class="sponsor"><img src="assets/sponsors/placeholder.svg" alt="Sponsor logo coming soon" /></li>
+            <li class="sponsor"><img src="assets/sponsors/placeholder.svg" alt="Sponsor logo coming soon" /></li>
+            <li class="sponsor"><img src="assets/sponsors/placeholder.svg" alt="Sponsor logo coming soon" /></li>
+            <li class="sponsor"><img src="assets/sponsors/placeholder.svg" alt="Sponsor logo coming soon" /></li>
+          </ul>
+          <button class="sponsor-btn" data-dir="1" aria-label="Scroll sponsors right">&#8250;</button>
         </div>
       </div>
     </section>
@@ -144,46 +168,43 @@
             <h3>True North Biomedical Competition</h3>
             <p>A portable cardiac triage system for natural disasters</p>
           </article>
-          </article>
-           <article class="card project" id="proj-gene">
+          <article class="card project" id="proj-research">
             <span class="tag">Research</span>
             <h3>Research Paper Team</h3>
             <p>A review paper on the treatment of Alzheimer’s disease through applications of hydrogel towards restoring neural stem cell functions</p>
           </article>
-          <article class="card project" id="proj-micro">
+          <article class="card project" id="proj-orthobreathe">
             <span class="tag">Alinnovate: H2i OrthoBreathe Design Team</span>
             <h3>Microfluidic Blood Cell Analysis</h3>
             <p>Allinovate’s OrthoBreathe is a nasal strip that alleviates symptoms of allergic rhinitis by trapping humidity in the nasal chamber to keep the mucosal lining hydrated.</p>
           </article>
-          <article class="card project" id="proj-ast">
+          <article class="card project" id="proj-meg2truth">
             <span class="tag">UTMIST x UTBIOME: MEG2Truth Design Team</span>
             <h3>Antimicrobial Susceptibility Testing</h3>
             <p>An audit and intervention system to evaluate and mitigate MetaAI Brain2Qwerty V1’s reliance on KenLM for neural signal to text decoding accuracy.</p>
           </article>
-          <article class="card project" id="proj-laser">
+          <article class="card project" id="proj-wearables">
             <span class="tag">Wearabales Design Team</span>
             <h3>Laser Polyp Removal</h3>
             <p>A wearable that reads heart and skin signals to detect stress and emotion</p>
           </article>
-          <article class="card project" id="proj-gene">
+          <article class="card project" id="proj-microfluidics">
             <span class="tag">Microfluidics Design Team @ Farcas Lab</span>
             <h3>Functional Gene Expression</h3>
             <p>A compact, point-of-care microfluidic diagnostic device to detect microhematuria 
             </p>
           </article>
-           <article class="card project" id="proj-gene">
+          <article class="card project" id="proj-ast">
             <span class="tag">Antimicrobial Susceptibility Testing (AST) Project</span>
             <h3>Functional Gene Expression</h3>
             <p>A microscope that specializes in rapid AST using dark-field microscopy and AI analysis</p>
           </article>
-          </article>
-           <article class="card project" id="proj-gene">
+          <article class="card project" id="proj-cpr">
             <span class="tag">SEDS Lab @ UofT: CPR Feedback Device</span>
             <h3>Functional Gene Expression</h3>
             <p>Real-time touch and sound feedback to help bystanders deliver CPR </p>
           </article>
-          </article>
-           <article class="card project" id="proj-gene">
+          <article class="card project" id="proj-eeg">
             <span class="tag">UofT NeuroTech × UTBIOME: EEG Elbow Design Team</span>
             <h3>Functional Gene Expression</h3>
             <p>A brain-controlled elbow brace: Translates EEG signals during executed movement attempts into arm brace movement.</p>
