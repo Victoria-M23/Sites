@@ -13,11 +13,18 @@
   --ink: #1b3f91;         /* text on white cards */
   --header-h: 76px;
   --dna-w: 46vw;          /* the DNA covers almost half the screen */
+  --footer-bg: #0f245c;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
+/* The page background is the footer colour, and the page doesn't "bounce"
+   past its end, so at the bottom the footer stays anchored instead of floating */
+html {
+  scroll-behavior: smooth;
+  background: var(--footer-bg);
+  overscroll-behavior-y: none;
+}
 
 body {
   background:
@@ -29,6 +36,7 @@ body {
   font-family: "Poppins", system-ui, sans-serif;
   line-height: 1.65;
   min-height: 100vh;
+  overscroll-behavior-y: none;
   display: flex;
   flex-direction: column;
 }
@@ -124,7 +132,7 @@ a { color: var(--ice); }
 body:not(.on-home) .dna { opacity: 0; }
 
 /* ===== Home page ===== */
-.scroll-track { height: 300vh; }   /* how much scrolling the animation takes */
+.scroll-track { height: 460vh; }   /* how much scrolling the animation takes (title → goals → atom) */
 
 .stage {
   position: sticky;
@@ -189,6 +197,37 @@ body:not(.on-home) .dna { opacity: 0; }
   0%, 100% { opacity: 0.3; transform: scaleX(0.6); transform-origin: left; }
   50%      { opacity: 1;   transform: scaleX(1); }
 }
+
+/* ===== Goals (first scene after the title) ===== */
+.goals-wrap {
+  position: absolute;
+  inset: 0 clamp(20px, 3vw, 48px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+.goals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(14px, 1.6vw, 24px);
+  width: 100%;
+  max-width: 940px;
+  margin: 2.2rem auto 0;
+}
+.goal {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  padding: clamp(20px, 2vw, 32px) clamp(16px, 1.6vw, 26px);
+  will-change: transform, opacity;
+}
+.goal:hover { transform: none; }   /* the scroll animation controls these cards */
+.goal h3 { font-size: 1.4rem; }
 
 /* ===== Subteam atom ===== */
 .atom-wrap {
@@ -268,12 +307,12 @@ body:not(.on-home) .dna { opacity: 0; }
 }
 
 .electron {
-  width: 19%;
+  width: 16%;
   aspect-ratio: 1;
-  padding: 2.2cqi;
+  padding: 1.2cqi;
   color: var(--royal);
   font-weight: 600;
-  font-size: 2cqi;
+  font-size: 1.7cqi;
   line-height: 1.2;
   background:
     radial-gradient(circle at 30% 26%, #fff, transparent 35%),
@@ -293,13 +332,66 @@ body:not(.on-home) .dna { opacity: 0; }
 .electron.dim { filter: saturate(0.6) brightness(0.9); }
 .electron:focus-visible { outline: 3px solid var(--ice); outline-offset: 3px; }
 
-/* Section after the animation (goals) */
-.home-after {
+/* ===== Sponsors (the DNA strand ends just above this) ===== */
+.sponsors {
   position: relative;
   z-index: 20;
-  margin-left: var(--dna-w);
-  padding: 80px clamp(20px, 4vw, 64px) 100px;
+  padding: 90px 0 110px;
 }
+.sponsor-scroller {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 1280px;
+  margin: 2.6rem auto 0;
+  padding: 0 clamp(12px, 3vw, 40px);
+}
+.sponsor-track {
+  list-style: none;
+  flex: 1;
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  padding: 10px 4px 18px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.45) transparent;
+}
+.sponsor-track:focus-visible { outline: 3px solid var(--ice); outline-offset: 4px; border-radius: 12px; }
+.sponsor-track::-webkit-scrollbar { height: 6px; }
+.sponsor-track::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.45); border-radius: 3px; }
+
+.sponsor {
+  flex: 0 0 clamp(180px, 22vw, 260px);
+  aspect-ratio: 16 / 9;
+  scroll-snap-align: start;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 10px 26px rgba(10, 30, 80, 0.25);
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  transition: transform 0.2s;
+}
+.sponsor:hover { transform: translateY(-3px); }
+.sponsor img { width: 100%; height: 100%; object-fit: contain; }
+
+.sponsor-btn {
+  flex: 0 0 auto;
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.sponsor-btn:hover { background: rgba(255, 255, 255, 0.25); }
+.sponsor-btn:disabled { opacity: 0.3; cursor: default; }
 
 .section-title {
   text-align: center;
@@ -378,9 +470,6 @@ body:not(.on-home) .dna { opacity: 0; }
   25%      { box-shadow: 0 0 0 5px var(--ice), 0 16px 40px rgba(10, 30, 80, 0.35); }
 }
 
-.goals .card { text-align: center; }
-.goals .card h3 { font-size: 1.4rem; }
-
 .person { padding: 18px 20px; border-top-color: var(--soft); }
 .person h5 { color: var(--ink); font-size: 0.98rem; font-weight: 600; margin-bottom: 0.2rem; }
 
@@ -412,7 +501,7 @@ body:not(.on-home) .dna { opacity: 0; }
 .site-footer {
   position: relative;
   z-index: 20;
-  background: rgba(15, 36, 92, 0.9);
+  background: var(--footer-bg);
   color: var(--text-soft);
   padding: 28px clamp(20px, 5vw, 56px);
   display: flex;
@@ -431,11 +520,21 @@ body:not(.on-home) .dna { opacity: 0; }
   .logo span { display: none; }
 }
 
+/* Not enough room beside the DNA for three boxes side by side: stack them */
+@media (max-width: 1000px) {
+  .goals { grid-template-columns: 1fr; max-width: 460px; margin-top: 1.4rem; gap: 12px; }
+  .goal { padding: 16px 20px; }
+  .goal h3 { font-size: 1.15rem; margin-bottom: 0.2rem; }
+  .goal p { font-size: 0.9rem; }
+  .goals-wrap .section-lead { font-size: 0.98rem; }
+}
+
 @media (max-width: 760px) {
   /* On phones the DNA sits behind the content instead of beside it */
   :root { --dna-w: 50vw; }
   .dna { opacity: 0.3; z-index: 0; }
-  .stage, .home-after { margin-left: 0; }
+  .stage { margin-left: 0; }
+  .sponsor-btn { display: none; }   /* swipe on phones */
   .stage { z-index: 1; }
 
   .nav-toggle { display: flex; }
@@ -457,7 +556,7 @@ body:not(.on-home) .dna { opacity: 0; }
   .logo span { display: inline; font-size: 1.1rem; }
 
   .atom { width: 100%; }
-  .electron { width: 23%; font-size: 2.3cqi; }
+  .electron { width: 19%; font-size: 2.1cqi; }
   .nucleus { font-size: 4.4cqi; }
 }
 
