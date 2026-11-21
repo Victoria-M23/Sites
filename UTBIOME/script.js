@@ -319,8 +319,9 @@ window.addEventListener("load", updatePartnerBtns);
 updatePartnerBtns();
 
 /* ---------- 6. About Us mural ---------- */
-// Swap these placeholders for real photos (any size; they are cropped to squares).
-// Tiles cycle through the list, so a few photos are enough to fill the circle.
+// A full-width band of tiles, about 1.5x as tall as a person card.
+// Swap these placeholders for real photos (any size; each is cropped to its tile).
+// Tiles cycle through the list, so a few photos are enough to fill the band.
 const MURAL_IMAGES = [
   "assets/mural/placeholder-1.svg",
   "assets/mural/placeholder-2.svg",
@@ -329,36 +330,43 @@ const MURAL_IMAGES = [
   "assets/mural/placeholder-5.svg",
   "assets/mural/placeholder-6.svg",
 ];
-const MURAL_TILES_ACROSS = 19;
+const MURAL_ROWS = 6;                // rows of tiles; columns are added to fill the width
+const MURAL_HEIGHT_VS_CARD = 1.5;    // band height compared with one person card
 const MURAL_SHOW_MS = 1500;          // how long a photo stays before fading back
 
 const mural = document.getElementById("mural");
 if (mural) {
-  const n = MURAL_TILES_ACROSS;
-  const r = n / 2;
-  mural.style.setProperty("--n", n);
-  let k = 0;
-  for (let row = 0; row < n; row++) {
-    for (let col = 0; col < n; col++) {
+  let builtFor = "";
+
+  // (Re)build the tiles to fit the current page width and card height
+  const buildMural = () => {
+    const card = document.querySelector("#page-about .person");
+    if (!card || !mural.offsetWidth || !card.offsetHeight) return;   // About page not showing
+    const height = Math.round(card.offsetHeight * MURAL_HEIGHT_VS_CARD);
+    const cols = Math.max(4, Math.round(mural.offsetWidth / (height / MURAL_ROWS)));  // near-square tiles
+    const key = `${cols}x${height}`;
+    if (key === builtFor) return;
+    builtFor = key;
+
+    mural.style.height = `${height}px`;
+    mural.style.setProperty("--cols", cols);
+    mural.style.setProperty("--rows", MURAL_ROWS);
+    mural.replaceChildren();
+    for (let i = 0; i < cols * MURAL_ROWS; i++) {
+      const row = Math.floor(i / cols);
       const tile = document.createElement("div");
       tile.className = "tile";
-      // keep only the tiles whose centre lies inside the circle
-      if (Math.hypot(col + 0.5 - r, row + 0.5 - r) > r) {
-        tile.classList.add("empty");
-      } else {
-        const img = document.createElement("img");
-        img.src = MURAL_IMAGES[(k * 7 + row) % MURAL_IMAGES.length];  // mix them up a bit
-        img.alt = "";
-        img.loading = "lazy";
-        tile.appendChild(img);
-        k++;
-      }
+      const img = document.createElement("img");
+      img.src = MURAL_IMAGES[(i * 7 + row) % MURAL_IMAGES.length];  // mix them up a bit
+      img.alt = "";
+      img.loading = "lazy";
+      tile.appendChild(img);
       mural.appendChild(tile);
     }
-  }
+  };
 
   const reveal = tile => {
-    if (!tile || tile.classList.contains("empty")) return;
+    if (!tile || !mural.contains(tile)) return;
     tile.classList.add("on");
     clearTimeout(tile._timer);
     tile._timer = setTimeout(() => tile.classList.remove("on"), MURAL_SHOW_MS);
@@ -369,6 +377,13 @@ if (mural) {
     if (e.pointerType !== "mouse") reveal(document.elementFromPoint(e.clientX, e.clientY)?.closest(".tile"));
   });
   mural.style.touchAction = "pan-y";
+
+  // Build once the About page is visible, and again if the window size changes
+  const buildSoon = () => requestAnimationFrame(buildMural);
+  window.addEventListener("hashchange", buildSoon);
+  window.addEventListener("resize", buildSoon);
+  window.addEventListener("load", buildSoon);
+  buildSoon();
 }
 
 /* ---------- Animation loop ---------- */
