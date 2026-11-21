@@ -497,6 +497,39 @@ body:not(.on-home) .dna { opacity: 0; }
 .contact-list a { text-decoration: none; font-weight: 500; }
 .contact-list a:hover { text-decoration: underline; }
 
+/* ===== About Us mural ===== */
+.mural {
+  --n: 15;                          /* tiles across (set from script.js) */
+  display: grid;
+  grid-template-columns: repeat(var(--n), 1fr);
+  width: min(680px, 100%);
+  aspect-ratio: 1;
+  margin: 3rem auto 1rem;
+}
+.tile {
+  position: relative;
+  background: #fff;
+  outline: 1px solid #111;          /* neighbouring outlines overlap into single black lines */
+  overflow: hidden;
+}
+.tile.empty { visibility: hidden; }
+.tile img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: scale(1.12);
+  transition: opacity 0.9s ease, transform 0.9s ease;   /* slow fade back to white */
+  pointer-events: none;
+}
+.tile.on img {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.25s ease, transform 0.4s ease;  /* quick reveal */
+}
+
 /* ===== Footer ===== */
 .site-footer {
   position: relative;
