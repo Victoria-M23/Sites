@@ -6,7 +6,7 @@
       then the goals leave and the subteam atom appears
    4. Atom: subteam electrons orbit a nucleus; hovering one
       stops the orbit, enlarges it and shrinks the others
-   5. Partners row: scrolls by itself in a loop; the DNA strand ends above it
+   5. Partners row: scrolls by itself in a loop (the DNA ends with the goals)
    6. About Us mural: a circle of tiles that reveal photos on hover
    ========================================================= */
 
@@ -170,7 +170,6 @@ const stage = document.querySelector(".stage");
 const hero = document.getElementById("hero");
 const goalsWrap = document.getElementById("goalsWrap");
 const goalCards = [...goalsWrap.querySelectorAll(".goal")];
-const partners = document.getElementById("partners");
 const atomWrap = document.getElementById("atomWrap");
 const atom = document.getElementById("atom");
 const nucleus = atom.querySelector(".nucleus");
@@ -183,6 +182,7 @@ function scrollProgress() {
 }
 
 let appear = 0;   // how far the atom has appeared (0–1)
+let dnaExit = 0;  // 0 = full DNA strand, 1 = its end has scrolled off the top
 
 function updateScene(p) {
   const h = stage.offsetHeight;
@@ -195,6 +195,9 @@ function updateScene(p) {
   // 2. Goals rise in one box at a time, hold, then fly up and out
   const gIn = clamp((p - 0.1) / 0.2);
   const gOut = easeOut(clamp((p - 0.5) / 0.14));
+
+  // The DNA strand ends with the goals: its end rises up the screen as the goals leave
+  dnaExit = clamp((p - 0.46) / 0.2);
   goalsWrap.style.opacity = String(Math.min(clamp(gIn * 3), 1 - gOut));
   goalsWrap.style.transform = `translateY(${-gOut * h * 0.6}px)`;
   goalsWrap.style.pointerEvents = gIn > 0.9 && gOut < 0.1 ? "auto" : "none";
@@ -398,10 +401,11 @@ function frame(time) {
   if (document.body.classList.contains("on-home")) {
     // Slow twist from scrolling, plus a gentle idle rotation so it always feels alive
     const phase = window.scrollY * 0.0045 + (reduceMotion ? 0 : time * 0.00015);
-    // The strand ends a little above the partners section as it scrolls into view
-    const endY = partners.getBoundingClientRect().top - canvas.getBoundingClientRect().top - 50;
-    drawDNA(phase, endY < H + 200 ? endY : Infinity);
     updateScene(scrollProgress());
+    // After the goals, the strand's tapered end travels up and off the screen
+    const taper = Math.max(W, 160) * 0.7;
+    const endY = dnaExit <= 0 ? Infinity : (H + taper) - dnaExit * (H + taper + 80);
+    drawDNA(phase, endY);
     updateAtom(dt);
     updatePartners(dt);
   }

@@ -13,6 +13,7 @@
   --ink: #1b3f91;         /* text on white cards */
   --header-h: 76px;
   --dna-w: 46vw;          /* the DNA covers almost half the screen */
+  --beside-dna: var(--dna-w);   /* title and goals sit to the right of the DNA */
   --footer-bg: #0f245c;
 }
 
@@ -138,8 +139,7 @@ body:not(.on-home) .dna { opacity: 0; }
   position: sticky;
   top: var(--header-h);
   height: calc(100vh - var(--header-h));
-  margin-left: var(--dna-w);
-  overflow: hidden;
+  overflow: hidden;   /* full width, so the atom can centre on the page once the DNA has ended */
 }
 
 .eyebrow {
@@ -154,6 +154,7 @@ body:not(.on-home) .dna { opacity: 0; }
 .hero {
   position: absolute;
   inset: 0 clamp(20px, 4vw, 64px);
+  left: calc(var(--beside-dna) + clamp(20px, 4vw, 64px));
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -202,6 +203,7 @@ body:not(.on-home) .dna { opacity: 0; }
 .goals-wrap {
   position: absolute;
   inset: 0 clamp(20px, 3vw, 48px);
+  left: calc(var(--beside-dna) + clamp(20px, 3vw, 48px));
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -242,7 +244,7 @@ body:not(.on-home) .dna { opacity: 0; }
 
 .atom {
   position: relative;
-  width: min(92%, calc(100vh - var(--header-h) - 40px));
+  width: min(94%, calc(100vh - var(--header-h) - 24px));   /* as big as the screen height allows */
   aspect-ratio: 1;
   container-type: inline-size;   /* lets text size itself to the atom */
 }
@@ -437,6 +439,7 @@ body:not(.on-home) .dna { opacity: 0; }
   text-transform: uppercase;
   letter-spacing: 0.14em;
   margin: 1.8rem 0 0.8rem;
+  text-align: center;
   scroll-margin-top: calc(var(--header-h) + 24px);
 }
 
@@ -446,7 +449,14 @@ body:not(.on-home) .dna { opacity: 0; }
   gap: 20px;
   margin-top: 2rem;
 }
-.card-grid.people { margin-top: 0; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); }
+.card-grid.people {
+  /* a centred, wrapping row: a single card (or a short last row) sits in the middle */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 0;
+}
+.card-grid.people > .card { flex: 0 1 240px; text-align: center; }
 
 .card {
   background: var(--white);
@@ -564,9 +574,8 @@ body:not(.on-home) .dna { opacity: 0; }
 
 @media (max-width: 760px) {
   /* On phones the DNA sits behind the content instead of beside it */
-  :root { --dna-w: 50vw; }
+  :root { --dna-w: 50vw; --beside-dna: 0px; }
   .dna { opacity: 0.3; z-index: 0; }
-  .stage { margin-left: 0; }
   .partner-btn { display: none; }   /* swipe on phones */
   .stage { z-index: 1; }
 
