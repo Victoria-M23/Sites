@@ -6,7 +6,7 @@
       then the goals leave and the subteam atom appears
    4. Atom: subteam electrons orbit a nucleus; hovering one
       stops the orbit, enlarges it and shrinks the others
-   5. Partners row: scrolls by itself in a loop (the DNA ends with the goals)
+   5. Partners row: moved with the arrow buttons
    6. About Us mural: a circle of tiles that reveal photos on hover
    ========================================================= */
 
@@ -293,43 +293,30 @@ document.addEventListener("pointerdown", e => {
 }, true);
 
 /* ---------- 5. Partners row ---------- */
-// The logos drift slowly to the left in an endless loop. Hovering, focusing or touching the
-// row pauses it; it can still be scrolled by hand or with the arrow buttons.
+// The row stays still; the arrow buttons move it one "page" of logos at a time.
+// Each arrow is greyed out once there is nothing more to see in that direction.
 const partnerTrack = document.getElementById("partnerTrack");
-const PARTNER_SPEED = 40;                 // pixels per second
-let partnerPaused = false;
-let partnerPos = 0;
+const partnerBtns = document.querySelectorAll(".partner-btn");
 
-// A second copy of the logos follows the first, so the loop has no visible jump
-[...partnerTrack.children].forEach(li => {
-  const copy = li.cloneNode(true);
-  copy.setAttribute("aria-hidden", "true");
-  partnerTrack.appendChild(copy);
-});
-const loopWidth = () => partnerTrack.scrollWidth / 2;
-
-function updatePartners(dt) {
-  if (partnerPaused || reduceMotion) { partnerPos = partnerTrack.scrollLeft; return; }
-  partnerPos += PARTNER_SPEED * dt;
-  if (partnerPos >= loopWidth()) partnerPos -= loopWidth();
-  partnerTrack.scrollLeft = partnerPos;
+function updatePartnerBtns() {
+  const max = partnerTrack.scrollWidth - partnerTrack.clientWidth - 2;
+  partnerBtns.forEach(btn => {
+    btn.disabled = btn.dataset.dir === "-1" ? partnerTrack.scrollLeft <= 2 : partnerTrack.scrollLeft >= max;
+  });
+  partnerTrack.classList.toggle("more-left", partnerTrack.scrollLeft > 2);
+  partnerTrack.classList.toggle("more-right", partnerTrack.scrollLeft < max);
 }
 
-const pausePartners = on => () => { partnerPaused = on; };
-partnerTrack.addEventListener("pointerenter", pausePartners(true));
-partnerTrack.addEventListener("pointerleave", pausePartners(false));
-partnerTrack.addEventListener("focusin", pausePartners(true));
-partnerTrack.addEventListener("focusout", pausePartners(false));
-partnerTrack.addEventListener("touchstart", pausePartners(true), { passive: true });
-partnerTrack.addEventListener("touchend", () => setTimeout(pausePartners(false), 1500));
-
-document.querySelectorAll(".partner-btn").forEach(b => b.addEventListener("click", () => {
-  const w = loopWidth();
-  let x = partnerTrack.scrollLeft + Number(b.dataset.dir) * partnerTrack.clientWidth * 0.6;
-  x = ((x % w) + w) % w;                  // wrap around in either direction
-  partnerPos = x;
-  partnerTrack.scrollTo({ left: x, behavior: "auto" });
+partnerBtns.forEach(btn => btn.addEventListener("click", () => {
+  partnerTrack.scrollBy({
+    left: Number(btn.dataset.dir) * partnerTrack.clientWidth * 0.8,
+    behavior: reduceMotion ? "auto" : "smooth",
+  });
 }));
+partnerTrack.addEventListener("scroll", updatePartnerBtns, { passive: true });
+window.addEventListener("resize", updatePartnerBtns);
+window.addEventListener("load", updatePartnerBtns);
+updatePartnerBtns();
 
 /* ---------- 6. About Us mural ---------- */
 // Swap these placeholders for real photos (any size; they are cropped to squares).
@@ -400,7 +387,6 @@ function frame(time) {
     const endY = dnaExit <= 0 ? Infinity : (H + taper) - dnaExit * (H + taper + 80);
     drawDNA(phase, endY);
     updateAtom(dt);
-    updatePartners(dt);
   }
   requestAnimationFrame(frame);
 }
