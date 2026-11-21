@@ -350,7 +350,7 @@ const MURAL_IMAGES = [
   "assets/mural/placeholder-6.svg",
 ];
 const MURAL_TILES_ACROSS = 19;
-const MURAL_SHOW_MS = 3000;          // how long a photo stays before fading back
+const MURAL_SHOW_MS = 1500;          // how long a photo stays before fading back
 
 const mural = document.getElementById("mural");
 if (mural) {
